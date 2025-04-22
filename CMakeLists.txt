@@ -1,0 +1,6 @@
+cmake_minimum_required(VERSION 4.0)
+project( ascii_art )
+find_package( OpenCV REQUIRED )
+include_directories( ${OpenCV_INCLUDE_DIRS} )
+add_executable( ascii_art ascii_art.cpp )
+target_link_libraries( ascii_art ${OpenCV_LIBS} )
