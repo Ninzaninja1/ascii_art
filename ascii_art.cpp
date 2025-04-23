@@ -7,7 +7,8 @@ using namespace std;
 
 void ImageToAscii(string imagePath);
 void VideoToAscii(string video);
-void ImageIteration(Mat frame);
+Mat ImageIteration(Mat frame);
+Mat DifferenceOfGaussian(Mat input);
 
 int main(void) {
 
@@ -16,7 +17,7 @@ int main(void) {
   string video = "bad_apple.mp4";
   string input;
 
-  cout << "Input the file name below (with the file extension) or '/dev/video0' for your webcam: \n" << endl;
+  cout << "Input the file name below (with the file extension) or 'webcam' for your webcam: \n" << endl;
   getline(cin, input);
 
   if(input.substr(input.find_last_of(".") + 1) == "png") {
@@ -25,23 +26,32 @@ int main(void) {
   else if (input.substr(input.find_last_of(".") + 1) == "mp4"){
     VideoToAscii(input);
   }
-  else if (input == webcam){
+  else if (input == "webcam"){
     VideoToAscii(webcam);
   }
   else {
     cout << "Please use a valid file (only png or mp4 or webcam) ";
   }
 
-
-  ImageToAscii(input);
-  // VideoToAscii(webcam);
-
   return 0;
 }
 
-void ImageIteration(Mat frame){
+Mat DifferenceOfGaussian(Mat input){
+  Mat gaussianImage1;
+  Mat gaussianImage2;
+  
+  float tau = 1;
 
-  uchar greyscale;
+  GaussianBlur(input, gaussianImage1, Size(15, 15), 0);
+  GaussianBlur(input, gaussianImage2, Size(35, 35), 0);
+
+  input = gaussianImage2 - (tau * gaussianImage1);
+
+  return input;
+}
+
+Mat ImageIteration(Mat frame){
+
   int average;
 
   // different ascii textures
@@ -51,11 +61,9 @@ void ImageIteration(Mat frame){
   array<char, 10>  texture4{'#' , '@' , '?' , '0' , 'P' , 'o' , 'c' , ':' , '.', ' '};
 
   // iterate thrgouh the image
-  for (int row = 0; row < frame.rows; row+=8) {
-    for (int col = 0; col < frame.cols; col+=8) {
-
-      greyscale = frame.at<uchar>(row,col);
-      average = greyscale % 10 ;
+  for (int row = 0; row < frame.rows; row+=4) {
+    for (int col = 0; col < frame.cols; col+=4) {
+      average = (int)(frame.at<uchar>(row,col)) % 10;
        
       cout << texture3[average];
       cout << " ";
@@ -64,6 +72,8 @@ void ImageIteration(Mat frame){
     cout << "\n";
  }
 
+  // imshow("", frame);
+ return frame;
 }
 
 void ImageToAscii(string imagePath){
@@ -81,8 +91,9 @@ void ImageToAscii(string imagePath){
   }
 
   imageScaled.convertTo(imageContrast, -1, 2.0, -100);
+  imageContrast = DifferenceOfGaussian(imageContrast);
 
-  ImageIteration(imageContrast);
+  imageContrast = ImageIteration(imageContrast);
 
   imshow("hehe its lloy", imageContrast);
   waitKey(0);
@@ -100,6 +111,7 @@ void VideoToAscii(string video){
   int average;
 
   cap.open(video);
+
   // check if the file is opened
   if (cap.isOpened()) {
     cout << "Opened" << endl;
@@ -120,19 +132,18 @@ void VideoToAscii(string video){
       return;
     }
 
-    cvtColor(frame, frame, COLOR_BGR2GRAY);
-    // add cotrast to frame
-    frame.convertTo(frameContrast, -1, 2.0, 0);
+    cvtColor(frame, frame, COLOR_BGR2GRAY); // change image to greyscale
+    // frame.convertTo(frameContrast, -1, 2.0, 0); // add cotrast to frame
+    frameContrast = DifferenceOfGaussian(frame); // apply the difference of gaussians 
 
-   
-    ImageIteration(frameContrast);
+    frameContrast = ImageIteration(frameContrast);
 
     int framerate = 1000/24;
 
-    imshow("", frame);
+    imshow("", frameContrast);
     waitKey(framerate);
 
-    system("clear");
+    //system("clear");
   }
 
   cap.release();
