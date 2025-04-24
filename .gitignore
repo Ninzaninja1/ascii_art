@@ -1,0 +1,7 @@
+*.png
+*.mp4
+CMakeCache.txt
+Makefile
+cmake_install.cmake
+build/
+CMakeFiles/
