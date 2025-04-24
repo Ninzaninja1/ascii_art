@@ -13,6 +13,7 @@ Please install the required dependencies:
 - opencv2
 - opencv
 - gcc
+- vtk
 
 Made using Cpp by Ninzaninja
 Started 20 Apr 2025; Last Edited 22 Apr 2025
