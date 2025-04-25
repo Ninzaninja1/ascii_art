@@ -14,6 +14,7 @@ Please install the required dependencies:
 - opencv
 - gcc
 - vtk
+- hdf5
 
 Made using Cpp by Ninzaninja
 Started 20 Apr 2025; Last Edited 22 Apr 2025
